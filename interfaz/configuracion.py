@@ -1,6 +1,9 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import Qt
 
+# Importación corregida apuntando a la carpeta utils
+from utils.graficas import VentanaGrafica
+
 from algoritmos.pso import ejecutar_pso
 from algoritmos.ga import ejecutar_ga
 
@@ -14,15 +17,12 @@ class VentanaConfiguracion(QWidget):
     def __init__(self, problema, funcion, algoritmo, objetivo):
         super().__init__()
 
-        # ==========================================
-        # GUARDAR DATOS
-        # ==========================================
         self.problema = problema
         self.funcion = funcion
         self.algoritmo = algoritmo
         self.objetivo = objetivo
 
-        # Inicializamos los componentes en None para evitar AttributeError
+        # Inputs inicializados en None por seguridad
         self.particulas = None
         self.iteraciones = None
         self.poblacion = None
@@ -31,43 +31,28 @@ class VentanaConfiguracion(QWidget):
         self.cruza = None
         self.dimensiones = None
 
-        # ==========================================
-        # CONFIGURAR VENTANA
-        # ==========================================
-        self.setWindowTitle("Configuración")
-        self.resize(450, 500)  # Ajuste de tamaño inicial más estándar
+        self.setWindowTitle("Configuración del Algoritmo")
+        self.resize(450, 500)
 
-        # ==========================================
-        # LAYOUT PRINCIPAL
-        # ==========================================
         layout_principal = QVBoxLayout()
-        
-        # Usamos un formulario para que los labels e inputs queden alineados elegantemente
-        layout_form = QFormLayout() 
+        layout_form = QFormLayout()
 
-        # ==========================================
-        # TÍTULO E INFORMACIÓN
-        # ==========================================
-        titulo = QLabel("Configuración del Problema")
+        titulo = QLabel("Configuración de Parámetros")
         titulo.setStyleSheet("font-size: 18px; font-weight: bold; margin-bottom: 10px;")
         titulo.setAlignment(Qt.AlignCenter)
         layout_principal.addWidget(titulo)
 
-        # Resumen de lo seleccionado
-        layout_form.addRow("<b>Problema:</b>", QLabel(problema))
-        layout_form.addRow("<b>Función:</b>", QLabel(funcion))
-        layout_form.addRow("<b>Algoritmo:</b>", QLabel(algoritmo))
-        layout_form.addRow("<b>Objetivo:</b>", QLabel(objetivo))
+        layout_form.addRow("<b>Problema seleccionado:</b>", QLabel(problema))
+        layout_form.addRow("<b>Función objetivo:</b>", QLabel(funcion))
+        layout_form.addRow("<b>Algoritmo a ejecutar:</b>", QLabel(algoritmo))
+        layout_form.addRow("<b>Estrategia:</b>", QLabel(objetivo))
         
-        # Línea divisoria
         separador = QFrame()
         separador.setFrameShape(QFrame.HLine)
         separador.setFrameShadow(QFrame.Sunken)
         layout_form.addRow(separador)
 
-        # =================================================
-        # CONFIGURACIÓN ESPECÍFICA DEL ALGORITMO
-        # =================================================
+        # Renderizado de campos según el algoritmo
         if "PSO" in algoritmo:
             self.particulas = QSpinBox()
             self.particulas.setRange(1, 1000)
@@ -78,8 +63,11 @@ class VentanaConfiguracion(QWidget):
             self.iteraciones.setRange(1, 10000)
             self.iteraciones.setValue(100)
             layout_form.addRow("Número de iteraciones:", self.iteraciones)
-            
-            # Nota: Si tu PSO requiere dimensiones, añade aquí el input igual que en GA.
+
+            self.dimensiones = QSpinBox()
+            self.dimensiones.setRange(2, 100)
+            self.dimensiones.setValue(2)
+            layout_form.addRow("Dimensiones del problema:", self.dimensiones)
 
         elif "GA" in algoritmo:
             self.poblacion = QSpinBox()
@@ -107,65 +95,52 @@ class VentanaConfiguracion(QWidget):
             self.dimensiones = QSpinBox()
             self.dimensiones.setRange(2, 100)
             self.dimensiones.setValue(10)
-            layout_form.addRow("Dimensiones:", self.dimensiones)
+            layout_form.addRow("Dimensiones del problema:", self.dimensiones)
 
         layout_principal.addLayout(layout_form)
-        layout_principal.addStretch() # Empuja el botón hacia abajo
+        layout_principal.addStretch()
 
-        # =================================================
-        # BOTÓN EJECUTAR
-        # =================================================
-        boton_ejecutar = QPushButton("Ejecutar Algoritmo")
+        boton_ejecutar = QPushButton("Ejecutar")
         boton_ejecutar.setStyleSheet("padding: 10px; font-size: 14px; font-weight: bold;")
         boton_ejecutar.clicked.connect(self.ejecutarAlgoritmo)
         layout_principal.addWidget(boton_ejecutar)
 
         self.setLayout(layout_principal)
 
-    # =================================================
-    # OBTENER FUNCIÓN
-    # =================================================
     def obtenerFuncion(self):
         funciones = {
-            "Sphere": sphere,
-            "Rastrigin": rastrigin,
-            "Rosenbrock": rosenbrock,
-            "OneMax": onemax,
-            "Binario Inverso": binario_inverso,
-            "Color Matching": color_matching
+            "Sphere": sphere, "Rastrigin": rastrigin, "Rosenbrock": rosenbrock,
+            "OneMax": onemax, "Binario Inverso": binario_inverso, "Color Matching": color_matching
         }
-        # .get evita que la app truene si se pasa un string inexistente
         return funciones.get(self.funcion, None)
 
-    # =================================================
-    # EJECUTAR ALGORITMO
-    # =================================================
     def ejecutarAlgoritmo(self):
         funcion = self.obtenerFuncion()
         if not funcion:
-            QMessageBox.critical(self, "Error", f"La función '{self.funcion}' no está implementada.")
+            QMessageBox.critical(self, "Error", f"La función '{self.funcion}' no está mapeada.")
             return
 
-        # =================================================
-        # PSO
-        # =================================================
+        self.ventana_grafica = None
+
+        # Ejecución PSO
         if "PSO" in self.algoritmo and self.particulas:
             particulas = self.particulas.value()
             iteraciones = self.iteraciones.value()
+            dimensiones = self.dimensiones.value()
 
-            # Lógica de ejecución (Asegúrate si requiere o no 'dimensiones')
-            mejor, fitness, historial = ejecutar_pso(funcion, particulas, iteraciones)
-
+            # LÍNEA 131 CORREGIDA:
+            mejor, fitness, historial = ejecutar_pso(funcion, particulas, iteraciones, dimensiones=dimensiones)
             QMessageBox.information(
                 self, "Resultado PSO",
-                f"<b>Mejor posición:</b><br>{mejor}<br><br>"
-                f"<b>Fitness:</b><br>{fitness}<br><br>"
-                f"<b>Iteraciones:</b><br>{len(historial)}"
+                f"<b>Mejor posición encontrada:</b><br>{mejor}<br><br>"
+                f"<b>Fitness óptimo:</b><br>{fitness}<br><br>"
+                f"<b>Iteraciones completadas:</b><br>{len(historial)}"
             )
+            
+            self.ventana_grafica = VentanaGrafica(historial, self.algoritmo, self.funcion, self.objetivo, self)
+            self.ventana_grafica.show()
 
-        # =================================================
-        # GA
-        # =================================================
+        # Ejecución GA
         elif "GA" in self.algoritmo and self.poblacion:
             poblacion = self.poblacion.value()
             generaciones = self.generaciones.value()
@@ -182,13 +157,13 @@ class VentanaConfiguracion(QWidget):
 
             QMessageBox.information(
                 self, "Resultado GA",
-                f"<b>Mejor solución:</b><br>{mejor}<br><br>"
-                f"<b>Fitness:</b><br>{fitness}<br><br>"
-                f"<b>Iteraciones ejecutadas:</b><br>{len(historial)}"
+                f"<b>Mejor solución encontrada:</b><br>{mejor}<br><br>"
+                f"<b>Fitness óptimo:</b><br>{fitness}<br><br>"
+                f"<b>Generaciones ejecutadas:</b><br>{len(historial)}"
             )
+            
+            self.ventana_grafica = VentanaGrafica(historial, self.algoritmo, self.funcion, self.objetivo, self)
+            self.ventana_grafica.show()
 
-        # =================================================
-        # OTROS (ACO, AIS, DE)
-        # =================================================
         elif any(alg in self.algoritmo for alg in ["ACO", "AIS", "DE"]):
-            QMessageBox.information(self, "Información", f"{self.algoritmo} todavía no está implementado.")
+            QMessageBox.information(self, "Módulo Incompleto", f"El algoritmo {self.algoritmo} se encuentra en desarrollo.")
