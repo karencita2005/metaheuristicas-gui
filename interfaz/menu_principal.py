@@ -1,4 +1,5 @@
 from PyQt5.QtWidgets import *
+from interfaz.configuracion import VentanaConfiguracion
 
 class MenuPrincipal(QWidget):
 
@@ -17,21 +18,21 @@ class MenuPrincipal(QWidget):
         self.comboProblema = QComboBox()
 
         self.comboProblema.addItems([
-            "Función continua",
-            "Función binaria",
-            "Función categórica",
-            "TSP"
+         "Función continua",
+         "Función binaria",
+         "Función categórica",
+         "Problema del Viajero (TSP)"
         ])
 
         # Combo Algoritmo
         self.comboAlgoritmo = QComboBox()
 
         self.comboAlgoritmo.addItems([
-            "GA",
-            "ACO",
-            "PSO",
-            "AIS",
-            "DE"
+         "Algoritmo Genético (GA)",
+         "Colonia de Hormigas (ACO)",
+         "Enjambre de Partículas (PSO)",
+         "Sistema Inmune Artificial (AIS)",
+         "Evolución Diferencial (DE)"
         ])
 
         # Objetivo
@@ -40,6 +41,7 @@ class MenuPrincipal(QWidget):
 
         # Botón
         boton = QPushButton("Continuar")
+        boton.clicked.connect(self.abrirConfiguracion)
 
         layout.addWidget(titulo)
 
@@ -56,3 +58,22 @@ class MenuPrincipal(QWidget):
         layout.addWidget(boton)
 
         self.setLayout(layout)
+
+    def abrirConfiguracion(self):
+
+        problema = self.comboProblema.currentText()
+
+        algoritmo = self.comboAlgoritmo.currentText()
+
+        if self.maxRadio.isChecked():
+            objetivo = "Maximización"
+        else:
+            objetivo = "Minimización"
+
+        self.ventana = VentanaConfiguracion(
+            problema,
+            algoritmo,
+            objetivo
+        )
+
+        self.ventana.show()
