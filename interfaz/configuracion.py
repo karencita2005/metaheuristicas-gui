@@ -3,7 +3,7 @@ from algoritmos.pso import ejecutar_pso
 
 class VentanaConfiguracion(QWidget):
 
-    def __init__(self, problema, algoritmo, objetivo):
+    def __init__(self, problema, funcion, algoritmo, objetivo):
         super().__init__()
 
         # ==========================================
@@ -11,9 +11,10 @@ class VentanaConfiguracion(QWidget):
         # ==========================================
 
         self.algoritmo = algoritmo
+        self.funcion = funcion
 
         # ==========================================
-        # CONFIGURACIÓN DE VENTANA
+        # CONFIGURACIÓN VENTANA
         # ==========================================
 
         self.setWindowTitle("Configuración")
@@ -35,10 +36,11 @@ class VentanaConfiguracion(QWidget):
         layout.addWidget(titulo)
 
         # ==========================================
-        # INFORMACIÓN SELECCIONADA
+        # INFORMACIÓN
         # ==========================================
 
         layout.addWidget(QLabel(f"Problema: {problema}"))
+        layout.addWidget(QLabel(f"Función: {funcion}"))
         layout.addWidget(QLabel(f"Algoritmo: {algoritmo}"))
         layout.addWidget(QLabel(f"Objetivo: {objetivo}"))
 
@@ -48,14 +50,12 @@ class VentanaConfiguracion(QWidget):
 
         if "PSO" in algoritmo:
 
-            # Número de partículas
             self.particulas = QSpinBox()
             self.particulas.setValue(30)
 
             layout.addWidget(QLabel("Número de partículas"))
             layout.addWidget(self.particulas)
 
-            # Número de iteraciones
             self.iteraciones = QSpinBox()
             self.iteraciones.setValue(100)
 
@@ -68,14 +68,12 @@ class VentanaConfiguracion(QWidget):
 
         elif "GA" in algoritmo:
 
-            # Tamaño población
             self.poblacion = QSpinBox()
             self.poblacion.setValue(50)
 
             layout.addWidget(QLabel("Tamaño de población"))
             layout.addWidget(self.poblacion)
 
-            # Generaciones
             self.generaciones = QSpinBox()
             self.generaciones.setValue(100)
 
@@ -101,13 +99,13 @@ class VentanaConfiguracion(QWidget):
         self.setLayout(layout)
 
     # ==========================================
-    # FUNCIÓN EJECUTAR ALGORITMO
+    # EJECUTAR ALGORITMO
     # ==========================================
 
     def ejecutarAlgoritmo(self):
 
         # ==========================================
-        # EJECUTAR PSO
+        # PSO
         # ==========================================
 
         if "PSO" in self.algoritmo:
@@ -125,12 +123,13 @@ class VentanaConfiguracion(QWidget):
                 self,
                 "Resultado",
 
+                f"Función: {self.funcion}\n\n"
                 f"Mejor posición:\n{mejor_posicion}\n\n"
                 f"Mejor fitness:\n{mejor_fitness}"
             )
 
         # ==========================================
-        # GA TEMPORAL
+        # GA
         # ==========================================
 
         elif "GA" in self.algoritmo:
