@@ -7,15 +7,11 @@ class MenuPrincipal(QWidget):
         super().__init__()
 
         # ==========================================
-        # CONFIGURACIÓN VENTANA
+        # VENTANA
         # ==========================================
 
-        self.setWindowTitle("Metaheurísticas")
-        self.setGeometry(200, 200, 500, 450)
-
-        # ==========================================
-        # LAYOUT PRINCIPAL
-        # ==========================================
+        self.setWindowTitle("Sistema de Metaheurísticas")
+        self.setGeometry(200, 200, 600, 500)
 
         layout = QVBoxLayout()
 
@@ -24,12 +20,12 @@ class MenuPrincipal(QWidget):
         # ==========================================
 
         titulo = QLabel("Sistema de Metaheurísticas")
-        titulo.setStyleSheet("font-size: 20px;")
+        titulo.setStyleSheet("font-size: 22px;")
 
         layout.addWidget(titulo)
 
         # ==========================================
-        # TIPO DE PROBLEMA
+        # TIPO PROBLEMA
         # ==========================================
 
         self.comboProblema = QComboBox()
@@ -42,7 +38,7 @@ class MenuPrincipal(QWidget):
         ])
 
         self.comboProblema.currentTextChanged.connect(
-            self.actualizarFunciones
+            self.actualizarProblemas
         )
 
         layout.addWidget(QLabel("Tipo de problema"))
@@ -63,14 +59,6 @@ class MenuPrincipal(QWidget):
 
         self.comboAlgoritmo = QComboBox()
 
-        self.comboAlgoritmo.addItems([
-            "Algoritmo Genético (GA)",
-            "Colonia de Hormigas (ACO)",
-            "Enjambre de Partículas (PSO)",
-            "Sistema Inmune Artificial (AIS)",
-            "Evolución Diferencial (DE)"
-        ])
-
         layout.addWidget(QLabel("Algoritmo"))
         layout.addWidget(self.comboAlgoritmo)
 
@@ -78,15 +66,17 @@ class MenuPrincipal(QWidget):
         # OBJETIVO
         # ==========================================
 
-        self.maxRadio = QRadioButton("Maximizar")
-        self.minRadio = QRadioButton("Minimizar")
+        self.maxRadio = QRadioButton("Maximización")
+        self.minRadio = QRadioButton("Minimización")
+
+        self.minRadio.setChecked(True)
 
         layout.addWidget(QLabel("Objetivo"))
         layout.addWidget(self.maxRadio)
         layout.addWidget(self.minRadio)
 
         # ==========================================
-        # BOTÓN CONTINUAR
+        # BOTÓN
         # ==========================================
 
         boton = QPushButton("Continuar")
@@ -96,24 +86,21 @@ class MenuPrincipal(QWidget):
         layout.addWidget(boton)
 
         # ==========================================
-        # CARGAR FUNCIONES INICIALES
+        # INICIALIZAR
         # ==========================================
 
-        self.actualizarFunciones()
-
-        # ==========================================
-        # APLICAR LAYOUT
-        # ==========================================
+        self.actualizarProblemas()
 
         self.setLayout(layout)
 
     # ==========================================
-    # ACTUALIZAR FUNCIONES
+    # ACTUALIZAR PROBLEMAS
     # ==========================================
 
-    def actualizarFunciones(self):
+    def actualizarProblemas(self):
 
         self.comboFuncion.clear()
+        self.comboAlgoritmo.clear()
 
         problema = self.comboProblema.currentText()
 
@@ -129,6 +116,13 @@ class MenuPrincipal(QWidget):
                 "Rosenbrock"
             ])
 
+            self.comboAlgoritmo.addItems([
+                "Algoritmo Genético (GA)",
+                "Enjambre de Partículas (PSO)",
+                "Sistema Inmune Artificial (AIS)",
+                "Evolución Diferencial (DE)"
+            ])
+
         # ==========================================
         # BINARIAS
         # ==========================================
@@ -138,6 +132,11 @@ class MenuPrincipal(QWidget):
             self.comboFuncion.addItems([
                 "OneMax",
                 "Binario Inverso"
+            ])
+
+            self.comboAlgoritmo.addItems([
+                "Algoritmo Genético (GA)",
+                "Sistema Inmune Artificial (AIS)"
             ])
 
         # ==========================================
@@ -150,6 +149,10 @@ class MenuPrincipal(QWidget):
                 "Color Matching"
             ])
 
+            self.comboAlgoritmo.addItems([
+                "Algoritmo Genético (GA)"
+            ])
+
         # ==========================================
         # TSP
         # ==========================================
@@ -158,6 +161,11 @@ class MenuPrincipal(QWidget):
 
             self.comboFuncion.addItems([
                 "Traveling Salesman Problem"
+            ])
+
+            self.comboAlgoritmo.addItems([
+                "Algoritmo Genético (GA)",
+                "Colonia de Hormigas (ACO)"
             ])
 
     # ==========================================

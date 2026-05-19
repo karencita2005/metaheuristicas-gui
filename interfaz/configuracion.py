@@ -1,43 +1,30 @@
 from PyQt5.QtWidgets import *
+
 from algoritmos.pso import ejecutar_pso
+from algoritmos.ga import ejecutar_ga
+
+from problemas.continuas import *
+from problemas.binarias import *
+from problemas.categoricas import *
 
 class VentanaConfiguracion(QWidget):
 
     def __init__(self, problema, funcion, algoritmo, objetivo):
         super().__init__()
 
-        # ==========================================
-        # GUARDAR DATOS
-        # ==========================================
-
         self.algoritmo = algoritmo
         self.funcion = funcion
 
-        # ==========================================
-        # CONFIGURACIÓN VENTANA
-        # ==========================================
-
         self.setWindowTitle("Configuración")
-        self.setGeometry(300, 300, 500, 400)
 
-        # ==========================================
-        # LAYOUT PRINCIPAL
-        # ==========================================
+        self.setGeometry(300, 300, 500, 450)
 
         layout = QVBoxLayout()
 
-        # ==========================================
-        # TÍTULO
-        # ==========================================
-
-        titulo = QLabel("Configuración del Problema")
+        titulo = QLabel("Configuración")
         titulo.setStyleSheet("font-size: 18px;")
 
         layout.addWidget(titulo)
-
-        # ==========================================
-        # INFORMACIÓN
-        # ==========================================
 
         layout.addWidget(QLabel(f"Problema: {problema}"))
         layout.addWidget(QLabel(f"Función: {funcion}"))
@@ -45,7 +32,7 @@ class VentanaConfiguracion(QWidget):
         layout.addWidget(QLabel(f"Objetivo: {objetivo}"))
 
         # ==========================================
-        # CONFIGURACIÓN PSO
+        # PSO
         # ==========================================
 
         if "PSO" in algoritmo:
@@ -63,7 +50,7 @@ class VentanaConfiguracion(QWidget):
             layout.addWidget(self.iteraciones)
 
         # ==========================================
-        # CONFIGURACIÓN GA
+        # GA
         # ==========================================
 
         elif "GA" in algoritmo:
@@ -71,13 +58,13 @@ class VentanaConfiguracion(QWidget):
             self.poblacion = QSpinBox()
             self.poblacion.setValue(50)
 
-            layout.addWidget(QLabel("Tamaño de población"))
+            layout.addWidget(QLabel("Tamaño población"))
             layout.addWidget(self.poblacion)
 
             self.generaciones = QSpinBox()
             self.generaciones.setValue(100)
 
-            layout.addWidget(QLabel("Número de generaciones"))
+            layout.addWidget(QLabel("Generaciones"))
             layout.addWidget(self.generaciones)
 
         # ==========================================
@@ -85,24 +72,45 @@ class VentanaConfiguracion(QWidget):
         # ==========================================
 
         botonEjecutar = QPushButton("Ejecutar")
-        botonVolver = QPushButton("Volver")
 
-        botonEjecutar.clicked.connect(self.ejecutarAlgoritmo)
+        botonEjecutar.clicked.connect(
+            self.ejecutarAlgoritmo
+        )
 
         layout.addWidget(botonEjecutar)
-        layout.addWidget(botonVolver)
-
-        # ==========================================
-        # APLICAR LAYOUT
-        # ==========================================
 
         self.setLayout(layout)
 
     # ==========================================
-    # EJECUTAR ALGORITMO
+    # OBTENER FUNCIÓN
+    # ==========================================
+
+    def obtenerFuncion(self):
+
+        funciones = {
+
+            # Continuas
+            "Sphere": sphere,
+            "Rastrigin": rastrigin,
+            "Rosenbrock": rosenbrock,
+
+            # Binarias
+            "OneMax": onemax,
+            "Binario Inverso": binario_inverso,
+
+            # Categórica
+            "Color Matching": color_matching
+        }
+
+        return funciones[self.funcion]
+
+    # ==========================================
+    # EJECUTAR
     # ==========================================
 
     def ejecutarAlgoritmo(self):
+
+        funcion = self.obtenerFuncion()
 
         # ==========================================
         # PSO
@@ -115,6 +123,7 @@ class VentanaConfiguracion(QWidget):
             iteraciones = self.iteraciones.value()
 
             mejor_posicion, mejor_fitness, historial = ejecutar_pso(
+                funcion,
                 particulas,
                 iteraciones
             )
@@ -123,9 +132,8 @@ class VentanaConfiguracion(QWidget):
                 self,
                 "Resultado",
 
-                f"Función: {self.funcion}\n\n"
                 f"Mejor posición:\n{mejor_posicion}\n\n"
-                f"Mejor fitness:\n{mejor_fitness}"
+                f"Fitness:\n{mejor_fitness}"
             )
 
         # ==========================================
@@ -134,8 +142,20 @@ class VentanaConfiguracion(QWidget):
 
         elif "GA" in self.algoritmo:
 
+            poblacion = self.poblacion.value()
+
+            generaciones = self.generaciones.value()
+
+            mejor, fitness, historial = ejecutar_ga(
+                funcion,
+                poblacion,
+                generaciones
+            )
+
             QMessageBox.information(
                 self,
-                "Información",
-                "GA todavía no implementado"
+                "Resultado",
+
+                f"Mejor individuo:\n{mejor}\n\n"
+                f"Fitness:\n{fitness}"
             )

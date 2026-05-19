@@ -1,11 +1,10 @@
 import random
-from problemas.continuas import sphere
 
-def ejecutar_pso(num_particulas, iteraciones):
-
-    # ==========================================
-    # PARÁMETROS PSO
-    # ==========================================
+def ejecutar_pso(
+    funcion,
+    num_particulas,
+    iteraciones
+):
 
     w = 0.7
     c1 = 1.5
@@ -13,11 +12,11 @@ def ejecutar_pso(num_particulas, iteraciones):
 
     dimensiones = 2
 
+    particulas = []
+
     # ==========================================
     # CREAR PARTÍCULAS
     # ==========================================
-
-    particulas = []
 
     for _ in range(num_particulas):
 
@@ -31,7 +30,7 @@ def ejecutar_pso(num_particulas, iteraciones):
             for _ in range(dimensiones)
         ]
 
-        fitness = sphere(posicion)
+        fitness = funcion(posicion)
 
         particula = {
 
@@ -48,13 +47,13 @@ def ejecutar_pso(num_particulas, iteraciones):
     # GLOBAL BEST
     # ==========================================
 
-    gbest = min(
+    mejor = min(
         particulas,
         key=lambda p: p["pbest_fitness"]
     )
 
-    gbest_posicion = gbest["pbest"][:]
-    gbest_fitness = gbest["pbest_fitness"]
+    gbest_posicion = mejor["pbest"][:]
+    gbest_fitness = mejor["pbest_fitness"]
 
     historial = []
 
@@ -71,7 +70,6 @@ def ejecutar_pso(num_particulas, iteraciones):
                 r1 = random.random()
                 r2 = random.random()
 
-                # Actualizar velocidad
                 p["velocidad"][d] = (
 
                     w * p["velocidad"][d]
@@ -89,19 +87,15 @@ def ejecutar_pso(num_particulas, iteraciones):
                     )
                 )
 
-                # Actualizar posición
                 p["posicion"][d] += p["velocidad"][d]
 
-            # Evaluar fitness
-            fitness = sphere(p["posicion"])
+            fitness = funcion(p["posicion"])
 
-            # Actualizar pbest
             if fitness < p["pbest_fitness"]:
 
                 p["pbest"] = p["posicion"][:]
                 p["pbest_fitness"] = fitness
 
-            # Actualizar gbest
             if fitness < gbest_fitness:
 
                 gbest_posicion = p["posicion"][:]
